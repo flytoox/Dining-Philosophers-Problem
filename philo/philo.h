@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   philo.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: obelaizi <obelaizi@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: obelaizi <obelaizi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/30 03:39:25 by obelaizi          #+#    #+#             */
-/*   Updated: 2023/04/07 02:52:06 by obelaizi         ###   ########.fr       */
+/*   Updated: 2023/04/10 20:54:10 by obelaizi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,12 +23,16 @@
 
 typedef struct phl
 {
-	
+	long long	id;
+	pthread_t	thread;
+	long long	eating;
+	long long	time_to_die;
 }	t_phl;
 
 typedef struct gnrl
 {
-	long long	*args;
+	struct timeval	time;
+	long long		*args;
 }	t_gnrl;
 
 long long	ft_atoi(const char *str);
