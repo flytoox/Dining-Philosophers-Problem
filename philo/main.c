@@ -6,120 +6,90 @@
 /*   By: obelaizi <obelaizi@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/30 03:41:20 by obelaizi          #+#    #+#             */
-/*   Updated: 2023/04/27 08:13:33 by obelaizi         ###   ########.fr       */
+/*   Updated: 2023/05/07 22:14:36 by obelaizi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-void	give_me_args(char **argv, int argc, t_gnrl *gnrl)
+long long	get_time(long long start_time)
 {
-	long long	x;
-	long long	*args;
-	int			i;
+	struct timeval	tmp;
+	long long		curr_time;
 
-	args = malloc(sizeof(long long) * (argc - 1));
-	i = 0;
-	while (i < argc - 1)
-	{
-		x = ft_atoi(*++argv);
-		if (x == -1)
-			return(printf("Dude don't enter something that not a number"), exit(1));
-		args[i++] = x;
-	}
-    gnrl->num_phil = args[0];
-    gnrl->tm_die = args[1];
-    gnrl->tm_eat = args[2];
-    gnrl->tm_sleep = args[3];
-	if (argc == 6)
-    	gnrl->nm_eat = args[4];
-	else
-		gnrl->nm_eat = -1;
+	gettimeofday(&tmp, NULL);
+	curr_time = (tmp.tv_sec * 1000) + (tmp.tv_usec / 1000);
+	return (curr_time - start_time);
+}
+
+void	my_print(const char *str, t_phl *philo)
+{
+	pthread_mutex_lock(&philo->gnrl->prnt);
+	printf(str, get_time(philo->gnrl->start_time), philo->id);
+	pthread_mutex_unlock(&philo->gnrl->prnt);
 }
 
 void	*action(void *phl)
 {
-	t_phl	*philo;
+	t_phl		*philo;
+	long long	time_left;
+	long long	totl_phl;
 
 	philo = (t_phl *)phl;
-	// while (1)
+	totl_phl = philo->gnrl->num_phil;
+	if (philo->id % 2 == 0)
+		usleep(philo->gnrl->tm_eat * 1000);
+	while (1)
 	{
-		// pthread_mutex_lock(&philo->forks[philo->id - 1]);
-		// printf("%lld has taken fork", philo->id);
-		// pthread_mutex_lock(&philo->forks[philo->id]);
-		// printf("%lld has taken fork", philo->id + 1);
-		// pthread_mutex_unlock(&philo->forks[philo->id]);
-		// pthread_mutex_unlock(&philo->forks[philo->id - 1]);
-		
+		pthread_mutex_lock(&philo->gnrl->forks[philo->id - 1]);
+		my_print("%lld %lld has taken fork\n", philo);
+		pthread_mutex_lock(&philo->gnrl->forks[philo->id % totl_phl]);
+		my_print("%lld %lld has taken fork\n", philo);
+		my_print("%lld %lld is eating\n", philo);
+		usleep(philo->gnrl->tm_eat * 1000);
+		pthread_mutex_unlock(&philo->gnrl->forks[philo->id - 1]);
+		pthread_mutex_unlock(&philo->gnrl->forks[philo->id % totl_phl]);
+		philo->last_meal = get_time(philo->gnrl->start_time);
+		my_print("%lld %lld is sleeping\n", philo);
+		usleep(philo->gnrl->tm_sleep * 1000);
+		my_print("%lld %lld is thinking\n", philo);
 	}
 }
 
 void	create_threads(t_gnrl *gnrl)
 {
-	long long	i;
+	long long		i;
+	struct timeval	tm;
 
 	i = 0;
 	while (i < gnrl->num_phil)
-	{
-		pthread_mutex_init(&gnrl->phls->forks[i], NULL);
-		i++;
-	}
+		pthread_mutex_init(&gnrl->forks[i++], NULL);
+	pthread_mutex_init(&gnrl->prnt, NULL);
+	gettimeofday(&tm, NULL);
+	gnrl->start_time = (tm.tv_usec / 1000) + (tm.tv_sec * 1000);
 	i = 0;
 	while (i < gnrl->num_phil)
 	{
-		pthread_create(&gnrl->phls[i].thread, NULL, &action, &gnrl->phls[i]);
-		i++;
+		gnrl->phls[i].last_meal = get_time(gnrl->start_time);
+		pthread_create(&gnrl->phls[i].thread, NULL, &action, &gnrl->phls[i++]);
 	}
-	i = 0;
-	while (i < gnrl->num_phil)
-	{
-		pthread_join(gnrl->phls[i].thread, NULL);
-		i++;
-	}
+	check_death(gnrl);
 }
 
-void	init_var(t_gnrl *gnrl)
+int	main(int argc, char **argv)
 {
-	long long	i;
+	t_gnrl	gnrl;
 
-	i = 0;
-	gnrl->phls = malloc(sizeof(t_phl) * gnrl->num_phil);
-	gnrl->phls->forks = malloc(sizeof(pthread_mutex_t) * gnrl->num_phil);
-	while (i < gnrl->num_phil)
-	{
-		gnrl->phls[i].time_to_die = gnrl->tm_die;
-		gnrl->phls[i].id = i + 1;
-		i++;
-	}
-	create_threads(gnrl);
+	if (argc != 6 && argc != 5)
+		return (printf("Dude Arguments is sus\n"), 1);
+	give_me_args(argv, argc, &gnrl);
+	init_var(&gnrl);
+	return (0);
 }
 
-// int	main(int argc, char **argv)
+// int main()
+
 // {
-// 	t_gnrl	gnrl;
-
-// 	if (argc != 6 && argc != 5)
-// 		return (printf("Dude Arguments is sus"), 1);
-// 	give_me_args(argv, argc, &gnrl);
-// 	init_var(&gnrl);
+// 	long long s ;
+// 	printf("%lld\n", s);
 // }
-typedef struct hh
-{
-	int	*forks;
-}	bab;
-
-typedef struct gg
-{
-	bab		*phls;
-}	sab;
-
-
-int main()
-{
-	sab tmp;
-
-	tmp.phls = malloc(sizeof(bab) * 4);
-	tmp.phls->forks = malloc(sizeof(int) * 4);
-	tmp.phls[0].forks[0] = 5;
-	printf("%d", tmp.phls[0].forks[0]);
-}
