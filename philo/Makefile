@@ -6,13 +6,12 @@
 #    By: obelaizi <obelaizi@student.1337.ma>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/03/30 03:38:51 by obelaizi          #+#    #+#              #
-#    Updated: 2023/04/07 02:56:58 by obelaizi         ###   ########.fr        #
+#    Updated: 2023/05/10 18:40:59 by obelaizi         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = philo
-FLAGS = 
-#-Werror -Wall -Wextra
+FLAGS = -Werror -Wall -Wextra 
 
 SRCS = $(wildcard *.c )
 OBJS= $(SRCS:.c=.o)
