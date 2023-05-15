@@ -6,7 +6,7 @@
 /*   By: obelaizi <obelaizi@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/30 03:41:20 by obelaizi          #+#    #+#             */
-/*   Updated: 2023/05/10 18:50:49 by obelaizi         ###   ########.fr       */
+/*   Updated: 2023/05/15 16:36:24 by obelaizi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,19 +48,22 @@ int	eating(t_phl *philo)
 	}
 	pthread_mutex_lock(&philo->gnrl->forks[i1]);
 	if (my_print("%d %d has taken fork\n", philo))
-		return (1);
+		return (pthread_mutex_unlock(&philo->gnrl->forks[i1]), 1);
 	pthread_mutex_lock(&philo->gnrl->forks[i2]);
 	if (my_print("%d %d has taken fork\n", philo))
-		return (1);
+		return (pthread_mutex_unlock(&philo->gnrl->forks[i2]), 1);
 	if (my_print("%d %d is eating\n", philo))
+	{
+		return (pthread_mutex_unlock(&philo->gnrl->forks[i1]), 1);
+		return (pthread_mutex_unlock(&philo->gnrl->forks[i2]), 1);
 		return (1);
+	}
 	pthread_mutex_lock(&philo->mu_meal);
 	philo->last_meal = get_time(philo->gnrl->start_time);
 	pthread_mutex_unlock(&philo->mu_meal);
 	usleep(philo->gnrl->tm_eat * 1000);
 	pthread_mutex_unlock(&philo->gnrl->forks[i1]);
-	pthread_mutex_unlock(&philo->gnrl->forks[i2]);
-	return (0);
+	return (pthread_mutex_unlock(&philo->gnrl->forks[i2]), 0);
 }
 
 void	*action(void *phl)

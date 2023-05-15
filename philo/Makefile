@@ -6,12 +6,12 @@
 #    By: obelaizi <obelaizi@student.1337.ma>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/03/30 03:38:51 by obelaizi          #+#    #+#              #
-#    Updated: 2023/05/10 18:40:59 by obelaizi         ###   ########.fr        #
+#    Updated: 2023/05/15 16:27:21 by obelaizi         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = philo
-FLAGS = -Werror -Wall -Wextra 
+FLAGS = -Werror -Wall -Wextra -fsanitize=thread
 
 SRCS = $(wildcard *.c )
 OBJS= $(SRCS:.c=.o)
@@ -24,7 +24,7 @@ all : $(NAME)
 
 	
 $(NAME): $(OBJS)
-	@cc -g $(OBJS) -o $(NAME) 
+	@cc -g -fsanitize=thread $(OBJS) -o $(NAME) 
 
 clean:
 	@rm -f $(OBJS) 
