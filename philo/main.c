@@ -6,7 +6,7 @@
 /*   By: obelaizi <obelaizi@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/30 03:41:20 by obelaizi          #+#    #+#             */
-/*   Updated: 2023/05/15 16:36:24 by obelaizi         ###   ########.fr       */
+/*   Updated: 2023/05/21 11:14:59 by obelaizi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,8 +54,8 @@ int	eating(t_phl *philo)
 		return (pthread_mutex_unlock(&philo->gnrl->forks[i2]), 1);
 	if (my_print("%d %d is eating\n", philo))
 	{
-		return (pthread_mutex_unlock(&philo->gnrl->forks[i1]), 1);
-		return (pthread_mutex_unlock(&philo->gnrl->forks[i2]), 1);
+		pthread_mutex_unlock(&philo->gnrl->forks[i1]);
+		pthread_mutex_unlock(&philo->gnrl->forks[i2]);
 		return (1);
 	}
 	pthread_mutex_lock(&philo->mu_meal);
