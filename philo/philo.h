@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   philo.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: obelaizi <obelaizi@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: obelaizi <obelaizi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/30 03:39:25 by obelaizi          #+#    #+#             */
-/*   Updated: 2023/05/10 18:13:21 by obelaizi         ###   ########.fr       */
+/*   Updated: 2023/05/22 19:10:28 by obelaizi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,5 +55,7 @@ int			my_print(const char *str, t_phl *philo);
 int			get_time(int start_time);
 void		*number_eat(void	*var);
 void		free_all(t_gnrl *gnrl);
+void		ft_usleep(int time_sleep);
+void		*action(void *phl);
 
 #endif

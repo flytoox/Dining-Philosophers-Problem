@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: obelaizi <obelaizi@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: obelaizi <obelaizi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/30 03:41:20 by obelaizi          #+#    #+#             */
-/*   Updated: 2023/05/21 11:14:59 by obelaizi         ###   ########.fr       */
+/*   Updated: 2023/05/22 19:09:57 by obelaizi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,11 +24,14 @@ int	get_time(int start_time)
 
 int	my_print(const char *str, t_phl *philo)
 {
+	pthread_mutex_lock(&philo->gnrl->prnt);
 	pthread_mutex_lock(&philo->gnrl->mu_dead);
 	if (!philo->gnrl->dead)
-		return (pthread_mutex_unlock(&philo->gnrl->mu_dead), 1);
+	{
+		pthread_mutex_unlock(&philo->gnrl->mu_dead);
+		return (pthread_mutex_unlock(&philo->gnrl->prnt), 1);
+	}
 	pthread_mutex_unlock(&philo->gnrl->mu_dead);
-	pthread_mutex_lock(&philo->gnrl->prnt);
 	printf(str, get_time(philo->gnrl->start_time), philo->id);
 	pthread_mutex_unlock(&philo->gnrl->prnt);
 	return (0);
@@ -41,27 +44,24 @@ int	eating(t_phl *philo)
 
 	i1 = philo->id - 1;
 	i2 = philo->id % philo->gnrl->num_phil;
-	if (i1 > philo->id % philo->gnrl->num_phil)
-	{
-		i1 = philo->id % philo->gnrl->num_phil;
-		i2 = philo->id - 1;
-	}
 	pthread_mutex_lock(&philo->gnrl->forks[i1]);
 	if (my_print("%d %d has taken fork\n", philo))
 		return (pthread_mutex_unlock(&philo->gnrl->forks[i1]), 1);
 	pthread_mutex_lock(&philo->gnrl->forks[i2]);
 	if (my_print("%d %d has taken fork\n", philo))
+	{
+		pthread_mutex_unlock(&philo->gnrl->forks[i1]);
 		return (pthread_mutex_unlock(&philo->gnrl->forks[i2]), 1);
+	}
 	if (my_print("%d %d is eating\n", philo))
 	{
 		pthread_mutex_unlock(&philo->gnrl->forks[i1]);
-		pthread_mutex_unlock(&philo->gnrl->forks[i2]);
-		return (1);
+		return (pthread_mutex_unlock(&philo->gnrl->forks[i2]), 1);
 	}
 	pthread_mutex_lock(&philo->mu_meal);
 	philo->last_meal = get_time(philo->gnrl->start_time);
 	pthread_mutex_unlock(&philo->mu_meal);
-	usleep(philo->gnrl->tm_eat * 1000);
+	ft_usleep(philo->gnrl->tm_eat);
 	pthread_mutex_unlock(&philo->gnrl->forks[i1]);
 	return (pthread_mutex_unlock(&philo->gnrl->forks[i2]), 0);
 }
@@ -73,7 +73,7 @@ void	*action(void *phl)
 	philo = (t_phl *)phl;
 	philo->nm_eat = philo->gnrl->nm_eat;
 	if (philo->id % 2 == 0)
-		usleep(philo->gnrl->tm_eat * 1000);
+		ft_usleep(philo->gnrl->tm_eat - 10);
 	while (1)
 	{
 		pthread_mutex_lock(&philo->gnrl->mu_dead);
@@ -86,39 +86,11 @@ void	*action(void *phl)
 			philo->nm_eat--;
 		if (my_print("%d %d is sleeping\n", philo))
 			return (NULL);
-		usleep(philo->gnrl->tm_sleep * 1000);
+		ft_usleep(philo->gnrl->tm_sleep);
 		if (my_print("%d %d is thinking\n", philo))
 			return (NULL);
 	}
 	return (NULL);
-}
-
-void	create_threads(t_gnrl *gnrl)
-{
-	int				i;
-	struct timeval	tm;
-	pthread_t		check_nm_eat;
-
-	i = 0;
-	while (i < gnrl->num_phil)
-	{
-		pthread_mutex_init(&gnrl->forks[i++], NULL);
-		pthread_mutex_init(&gnrl->phls[i].mu_meal, NULL);
-	}
-	pthread_mutex_init(&gnrl->prnt, NULL);
-	i = 0;
-	gnrl->dead = 1;
-	gettimeofday(&tm, NULL);
-	gnrl->start_time = (tm.tv_usec / 1000) + (tm.tv_sec * 1000);
-	while (i < gnrl->num_phil)
-	{
-		gnrl->phls[i].last_meal = get_time(gnrl->start_time);
-		pthread_create(&gnrl->phls[i].thread, NULL, &action, &gnrl->phls[i]);
-		i++;
-	}
-	if (gnrl->nm_eat != -1)
-		pthread_create(&check_nm_eat, NULL, &number_eat, gnrl);
-	check_death(gnrl);
 }
 
 int	main(int argc, char **argv)

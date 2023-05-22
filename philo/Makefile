@@ -3,18 +3,17 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: obelaizi <obelaizi@student.1337.ma>        +#+  +:+       +#+         #
+#    By: obelaizi <obelaizi@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/03/30 03:38:51 by obelaizi          #+#    #+#              #
-#    Updated: 2023/05/15 15:51:15 by obelaizi         ###   ########.fr        #
+#    Updated: 2023/05/22 19:17:43 by obelaizi         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = philo
 FLAGS = -Werror -Wall -Wextra 
-#-fsanitize=thread
 
-SRCS = $(wildcard *.c )
+SRCS = free_all.c main.c mainHelper.c mainHelper1.c
 OBJS= $(SRCS:.c=.o)
 
 
@@ -23,7 +22,6 @@ all : $(NAME)
 %.o: %.c philo.h 
 	cc -c -g $(FLAGS) $< -o $@
 
-	
 $(NAME): $(OBJS)
 	@cc -g $(OBJS) -o $(NAME) 
 
