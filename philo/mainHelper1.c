@@ -6,13 +6,13 @@
 /*   By: obelaizi <obelaizi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/22 19:07:44 by obelaizi          #+#    #+#             */
-/*   Updated: 2023/05/22 19:10:06 by obelaizi         ###   ########.fr       */
+/*   Updated: 2023/06/08 20:45:19 by obelaizi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-void	give_me_args(char **argv, int argc, t_gnrl *gnrl)
+int	give_me_args(char **argv, int argc, t_gnrl *gnrl)
 {
 	int	x;
 	int	i;
@@ -23,7 +23,7 @@ void	give_me_args(char **argv, int argc, t_gnrl *gnrl)
 	{
 		x = ft_atoi(argv[i++]);
 		if (x < 0)
-			return (printf("We only accept positive int numbers ;)\n"), exit(1));
+			return (printf("We only accept positive int numbers ;)\n"), 1);
 	}
 	gnrl->num_phil = ft_atoi(argv[0]);
 	gnrl->tm_die = ft_atoi(argv[1]);
@@ -33,15 +33,18 @@ void	give_me_args(char **argv, int argc, t_gnrl *gnrl)
 		gnrl->nm_eat = ft_atoi(argv[4]);
 	else
 		gnrl->nm_eat = -1;
+	return (0);
 }
 
-void	init_var(t_gnrl *gnrl)
+int	init_var(t_gnrl *gnrl)
 {
 	int	i;
 
 	i = 0;
 	gnrl->phls = malloc(sizeof(t_phl) * gnrl->num_phil);
 	gnrl->forks = malloc(sizeof(pthread_mutex_t) * gnrl->num_phil);
+	if (!gnrl->phls || !gnrl->forks)
+		return (1);
 	while (i < gnrl->num_phil)
 	{
 		gnrl->phls[i].id = i + 1;
@@ -49,22 +52,25 @@ void	init_var(t_gnrl *gnrl)
 		i++;
 	}
 	pthread_mutex_init(&gnrl->mu_dead, NULL);
-	create_threads(gnrl);
+	return (create_threads(gnrl));
 }
 
-void	check_death(t_gnrl *gnrl)
+void	*check_death(void *var)
 {
-	int	i;
-	int	curr_time;
+	int		i;
+	t_gnrl	*gnrl;
 
 	i = 0;
+	gnrl = (t_gnrl *)var;
 	while (1)
 	{
 		if (i == gnrl->num_phil)
 			i = 0;
 		pthread_mutex_lock(&gnrl->phls[i].mu_meal);
-		curr_time = get_time(gnrl->start_time) - gnrl->phls[i].last_meal;
-		if (curr_time >= gnrl->tm_die)
+		if (!gnrl->dead)
+			return (NULL);
+		if (get_time(gnrl->start_time) - gnrl->phls[i].last_meal
+			>= gnrl->tm_die)
 		{
 			pthread_mutex_unlock(&gnrl->phls[i].mu_meal);
 			pthread_mutex_lock(&gnrl->prnt);
@@ -72,20 +78,15 @@ void	check_death(t_gnrl *gnrl)
 			gnrl->dead = 0;
 			pthread_mutex_unlock(&gnrl->mu_dead);
 			printf("%d %d died\n", get_time(gnrl->start_time), gnrl->phls[i].id);
-			pthread_mutex_unlock(&gnrl->prnt);
-			free_all(gnrl);
-			exit(0);
+			return (pthread_mutex_unlock(&gnrl->prnt), NULL);
 		}
-		pthread_mutex_unlock(&gnrl->phls[i].mu_meal);
-		i++;
+		pthread_mutex_unlock(&gnrl->phls[i++].mu_meal);
 	}
 }
 
-void	create_threads(t_gnrl *gnrl)
+int	create_threads(t_gnrl *gnrl)
 {
-	int				i;
-	struct timeval	tm;
-	pthread_t		check_nm_eat;
+	int	i;
 
 	i = -1;
 	while (++i < gnrl->num_phil)
@@ -96,15 +97,18 @@ void	create_threads(t_gnrl *gnrl)
 	pthread_mutex_init(&gnrl->prnt, NULL);
 	i = -1;
 	gnrl->dead = 1;
-	gettimeofday(&tm, NULL);
-	gnrl->start_time = (tm.tv_usec / 1000) + (tm.tv_sec * 1000);
+	gnrl->start_time = time_now();
 	while (++i < gnrl->num_phil)
 	{
 		gnrl->phls[i].last_meal = get_time(gnrl->start_time);
 		pthread_create(&gnrl->phls[i].thread, NULL, &action, &gnrl->phls[i]);
 	}
 	if (gnrl->nm_eat != -1)
-		pthread_create(&check_nm_eat, NULL, &number_eat, gnrl);
+	{
+		gnrl->is_nm_eat = 1;
+		pthread_create(&gnrl->check_nm_eat, NULL, &number_eat, gnrl);
+	}
 	usleep((gnrl->tm_die - 20));
-	check_death(gnrl);
+	pthread_create(&gnrl->check_dead, NULL, &check_death, gnrl);
+	return (free_all(gnrl));
 }

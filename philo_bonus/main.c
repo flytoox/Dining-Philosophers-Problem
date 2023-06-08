@@ -6,7 +6,7 @@
 /*   By: obelaizi <obelaizi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/30 03:41:20 by obelaizi          #+#    #+#             */
-/*   Updated: 2023/05/23 19:21:28 by obelaizi         ###   ########.fr       */
+/*   Updated: 2023/06/08 20:49:41 by obelaizi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,11 +26,8 @@ int	my_print(const char *str, t_phl *philo)
 {
 	sem_wait(philo->gnrl->prnt);
 	sem_wait(philo->gnrl->mu_dead);
-	if (!philo->gnrl->dead)
-	{
-		sem_post(philo->gnrl->mu_dead);
-		return (sem_post(philo->gnrl->prnt), 1);
-	}
+	if (check_death(philo))
+		return (exit(0), 1);
 	sem_post(philo->gnrl->mu_dead);
 	printf(str, get_time(philo->gnrl->start_time), philo->id);
 	sem_post(philo->gnrl->prnt);
@@ -58,6 +55,7 @@ int	eating(t_phl *philo)
 	ft_usleep(philo->gnrl->tm_eat);
 	sem_post(philo->gnrl->forks);
 	return (sem_post(philo->gnrl->forks), 0);
+	// return (0);
 }
 
 void	*action(void *phl)
@@ -70,21 +68,21 @@ void	*action(void *phl)
 		ft_usleep(philo->gnrl->tm_eat - 10);
 	while (1)
 	{
-		sem_wait(philo->gnrl->mu_dead);
-		if (!philo->gnrl->dead)
-			return (sem_post(philo->gnrl->mu_dead), NULL);
+		// sem_wait(philo->gnrl->mu_dead);
+		// if (!philo->gnrl->dead)
+		// 	return (sem_post(philo->gnrl->mu_dead), exit(0), NULL);
 		sem_post(philo->gnrl->mu_dead);
 		if (eating(philo))
-			return (NULL);
+			return (exit(0), NULL);
 		if (philo->nm_eat > 0)
 			philo->nm_eat--;
 		if (my_print("%d %d is sleeping\n", philo))
-			return (NULL);
+			return (exit(0), NULL);
 		ft_usleep(philo->gnrl->tm_sleep);
 		if (my_print("%d %d is thinking\n", philo))
-			return (NULL);
+			return (exit(0), NULL);
 	}
-	return (NULL);
+	return (exit(0), NULL);
 }
 
 int	main(int argc, char **argv)

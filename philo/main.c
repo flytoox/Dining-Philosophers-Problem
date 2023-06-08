@@ -6,7 +6,7 @@
 /*   By: obelaizi <obelaizi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/30 03:41:20 by obelaizi          #+#    #+#             */
-/*   Updated: 2023/05/22 19:09:57 by obelaizi         ###   ########.fr       */
+/*   Updated: 2023/06/08 20:48:36 by obelaizi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,7 +99,7 @@ int	main(int argc, char **argv)
 
 	if (argc != 6 && argc != 5)
 		return (printf("Dude Arguments is sus\n"), 1);
-	give_me_args(argv, argc, &gnrl);
-	init_var(&gnrl);
-	return (0);
+	if (give_me_args(argv, argc, &gnrl))
+		return (1);
+	return (init_var(&gnrl));
 }

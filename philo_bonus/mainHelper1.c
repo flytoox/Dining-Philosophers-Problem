@@ -6,7 +6,7 @@
 /*   By: obelaizi <obelaizi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/22 19:07:44 by obelaizi          #+#    #+#             */
-/*   Updated: 2023/05/23 19:23:06 by obelaizi         ###   ########.fr       */
+/*   Updated: 2023/05/25 13:55:37 by obelaizi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,6 @@ void	init_var(t_gnrl *gnrl)
 
 	i = 0;
 	gnrl->phls = malloc(sizeof(t_phl) * gnrl->num_phil);
-	gnrl->forks = malloc(sizeof(pthread_mutex_t) * gnrl->num_phil);
 	while (i < gnrl->num_phil)
 	{
 		gnrl->phls[i].id = i + 1;
@@ -52,33 +51,22 @@ void	init_var(t_gnrl *gnrl)
 	create_threads(gnrl);
 }
 
-void	check_death(t_gnrl *gnrl)
+int	check_death(t_phl *philo)
 {
-	int	i;
 	int	curr_time;
 
-	i = 0;
-	while (1)
+	sem_wait(philo->mu_meal);
+	curr_time = get_time(philo->gnrl->start_time) - philo->last_meal;
+	if (curr_time >= philo->gnrl->tm_die)
 	{
-		if (i == gnrl->num_phil)
-			i = 0;
-		sem_wait(gnrl->phls[i].mu_meal);
-		curr_time = get_time(gnrl->start_time) - gnrl->phls[i].last_meal;
-		if (curr_time >= gnrl->tm_die)
-		{
-			sem_post(gnrl->phls[i].mu_meal);
-			sem_wait(gnrl->prnt);
-			sem_wait(gnrl->mu_dead);
-			gnrl->dead = 0;
-			sem_post(gnrl->mu_dead);
-			printf("%d %d died\n", get_time(gnrl->start_time), gnrl->phls[i].id);
-			sem_post(gnrl->prnt);
-			free_all(gnrl);
-			exit(0);
-		}
-		sem_post(gnrl->phls[i].mu_meal);
-		i++;
+		sem_post(philo->mu_meal);
+		sem_wait(philo->gnrl->prnt);
+		printf("%d %d died\n", get_time(philo->gnrl->start_time), philo->id);
+		sem_post(philo->gnrl->prnt);
+		return (1);
 	}
+	sem_post(philo->mu_meal);
+	return (0);
 }
 
 void	create_threads(t_gnrl *gnrl)
@@ -86,6 +74,7 @@ void	create_threads(t_gnrl *gnrl)
 	int				i;
 	struct timeval	tm;
 	pthread_t		check_nm_eat;
+	pid_t			pid;
 
 	i = -1;
 	while (++i < gnrl->num_phil)
@@ -99,10 +88,13 @@ void	create_threads(t_gnrl *gnrl)
 	while (++i < gnrl->num_phil)
 	{
 		gnrl->phls[i].last_meal = get_time(gnrl->start_time);
-		pthread_create(&gnrl->phls[i].thread, NULL, &action, &gnrl->phls[i]);
+		pid = fork();
+		if (!pid)
+			action(&gnrl->phls[i]);
+		// pthread_create(&gnrl->phls[i].thread, NULL, &action, &gnrl->phls[i]);
 	}
 	if (gnrl->nm_eat != -1)
 		pthread_create(&check_nm_eat, NULL, &number_eat, gnrl);
-	usleep((gnrl->tm_die - 20));
-	check_death(gnrl);
+	waitpid(-1, NULL, 0);
+	free_all(gnrl);
 }

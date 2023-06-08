@@ -6,7 +6,7 @@
 /*   By: obelaizi <obelaizi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/07 22:13:03 by obelaizi          #+#    #+#             */
-/*   Updated: 2023/05/22 19:09:06 by obelaizi         ###   ########.fr       */
+/*   Updated: 2023/06/08 20:39:02 by obelaizi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,8 @@ void	*number_eat(void	*var)
 	gnrl = (t_gnrl *) var;
 	while (1)
 	{
+		if (!gnrl->dead)
+			return (NULL);
 		total = 0;
 		i = -1;
 		while (++i < gnrl->num_phil)
@@ -58,12 +60,11 @@ void	*number_eat(void	*var)
 			pthread_mutex_lock(&gnrl->mu_dead);
 			gnrl->dead = 0;
 			pthread_mutex_unlock(&gnrl->mu_dead);
-			return (printf("%d every philosopher ate enough\n",
-					get_time(gnrl->start_time)), free_all(gnrl), NULL);
+			return (printf("%d Enough is Enough\n", get_time(gnrl->start_time)),
+				pthread_mutex_unlock(&gnrl->prnt), NULL);
 		}
 		pthread_mutex_unlock(&gnrl->prnt);
 	}
-	return (NULL);
 }
 
 int	time_now(void)

@@ -6,7 +6,7 @@
 /*   By: obelaizi <obelaizi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/10 11:57:52 by obelaizi          #+#    #+#             */
-/*   Updated: 2023/05/23 19:20:26 by obelaizi         ###   ########.fr       */
+/*   Updated: 2023/05/23 20:58:56 by obelaizi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,8 @@ void	free_all(t_gnrl *gnrl)
 	int	i;
 
 	i = -1;
-	while (++i < gnrl->num_phil)
-		pthread_join(gnrl->phls[i].thread, NULL);
+	kill(0, SIGINT);
+	waitpid(-1, NULL, 0);
 	free(gnrl->phls);
 	exit(0);
 }

@@ -6,7 +6,7 @@
 /*   By: obelaizi <obelaizi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/30 03:39:25 by obelaizi          #+#    #+#             */
-/*   Updated: 2023/05/23 19:13:08 by obelaizi         ###   ########.fr       */
+/*   Updated: 2023/05/23 20:49:38 by obelaizi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,8 @@
 # include <pthread.h>
 # include <sys/time.h>
 # include <semaphore.h>
+# include <sys/types.h>
+# include <signal.h>
 
 typedef struct phl
 {
@@ -50,7 +52,7 @@ typedef struct gnrl
 int			ft_atoi(const char *str);
 void		give_me_args(char **argv, int argc, t_gnrl *gnrl);
 void		init_var(t_gnrl *gnrl);
-void		check_death(t_gnrl *gnrl);
+int			check_death(t_phl *philo);
 void		create_threads(t_gnrl *gnrl);
 int			my_print(const char *str, t_phl *philo);
 int			get_time(int start_time);
