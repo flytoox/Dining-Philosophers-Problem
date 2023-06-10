@@ -6,7 +6,7 @@
 /*   By: obelaizi <obelaizi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/22 19:07:44 by obelaizi          #+#    #+#             */
-/*   Updated: 2023/06/08 20:45:19 by obelaizi         ###   ########.fr       */
+/*   Updated: 2023/06/09 19:22:03 by obelaizi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,7 +108,7 @@ int	create_threads(t_gnrl *gnrl)
 		gnrl->is_nm_eat = 1;
 		pthread_create(&gnrl->check_nm_eat, NULL, &number_eat, gnrl);
 	}
-	usleep((gnrl->tm_die - 20));
+	usleep(gnrl->tm_die - 20);
 	pthread_create(&gnrl->check_dead, NULL, &check_death, gnrl);
 	return (free_all(gnrl));
 }
