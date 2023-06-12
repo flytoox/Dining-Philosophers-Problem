@@ -6,11 +6,11 @@
 /*   By: obelaizi <obelaizi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/30 03:41:20 by obelaizi          #+#    #+#             */
-/*   Updated: 2023/06/10 13:26:00 by obelaizi         ###   ########.fr       */
+/*   Updated: 2023/06/12 20:15:07 by obelaizi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "philo.h"
+#include "philo_bonus.h"
 
 int	get_time(int start_time)
 {
@@ -45,9 +45,7 @@ int	eating(t_phl *philo)
 		return (1);
 	if (my_print("%d %d is eating\n", philo))
 		return (1);
-	sem_wait(philo->mu_meal);
 	philo->last_meal = get_time(philo->gnrl->start_time);
-	sem_post(philo->mu_meal);
 	ft_usleep(philo->gnrl->tm_eat);
 	sem_post(philo->gnrl->forks);
 	sem_post(philo->gnrl->forks);
@@ -63,13 +61,9 @@ void	*action(void *phl)
 	engh_eat = 0;
 	pthread_create(&philo->thread, NULL, &check_death, philo);
 	if (philo->id % 2 == 0)
-		ft_usleep(philo->gnrl->tm_eat - 10);
+		ft_usleep(1);
 	while (1)
 	{
-		sem_wait(philo->gnrl->mu_dead);
-		if (!philo->gnrl->dead)
-			return (sem_post(philo->gnrl->mu_dead), exit(0), NULL);
-		sem_post(philo->gnrl->mu_dead);
 		if (eating(philo))
 			return (exit(0), NULL);
 		if (philo->gnrl->nm_eat == ++engh_eat)

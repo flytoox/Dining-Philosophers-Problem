@@ -6,11 +6,11 @@
 /*   By: obelaizi <obelaizi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/22 19:07:44 by obelaizi          #+#    #+#             */
-/*   Updated: 2023/06/10 13:26:20 by obelaizi         ###   ########.fr       */
+/*   Updated: 2023/06/12 20:15:08 by obelaizi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "philo.h"
+#include "philo_bonus.h"
 
 void	give_me_args(char **argv, int argc, t_gnrl *gnrl)
 {
@@ -26,6 +26,8 @@ void	give_me_args(char **argv, int argc, t_gnrl *gnrl)
 			return (printf("We only accept positive int numbers ;)\n"), exit(1));
 	}
 	gnrl->num_phil = ft_atoi(argv[0]);
+	if (!gnrl->num_phil)
+		return (printf("0 philosophers??\n"), exit(1));
 	gnrl->tm_die = ft_atoi(argv[1]);
 	gnrl->tm_eat = ft_atoi(argv[2]);
 	gnrl->tm_sleep = ft_atoi(argv[3]);
@@ -47,7 +49,6 @@ void	init_var(t_gnrl *gnrl)
 		gnrl->phls[i].gnrl = gnrl;
 		i++;
 	}
-	gnrl->mu_dead = sem_open("/dead", O_CREAT | O_EXCL, 0644, 1);
 	create_threads(gnrl);
 }
 
@@ -59,17 +60,14 @@ void	*check_death(void *phl)
 	philo = (t_phl *)phl;
 	while (1)
 	{
-		sem_wait(philo->mu_meal);
 		curr_time = get_time(philo->gnrl->start_time) - philo->last_meal;
 		if (curr_time >= philo->gnrl->tm_die)
 		{
-			sem_post(philo->mu_meal);
 			sem_wait(philo->gnrl->prnt);
 			printf("%d %d died\n", get_time(philo->gnrl->start_time), philo->id);
 			exit (0);
 			sem_post(philo->gnrl->prnt);
 		}
-		sem_post(philo->mu_meal);
 	}
 	return (0);
 }
@@ -89,6 +87,7 @@ void	create_threads(t_gnrl *gnrl)
 		if (!pid)
 			action(&gnrl->phls[i]);
 	}
+	usleep(500);
 	free_all(gnrl);
 }
 

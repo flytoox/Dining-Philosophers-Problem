@@ -6,7 +6,7 @@
 /*   By: obelaizi <obelaizi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/22 19:07:44 by obelaizi          #+#    #+#             */
-/*   Updated: 2023/06/09 19:22:03 by obelaizi         ###   ########.fr       */
+/*   Updated: 2023/06/12 23:33:20 by obelaizi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,8 @@ int	give_me_args(char **argv, int argc, t_gnrl *gnrl)
 			return (printf("We only accept positive int numbers ;)\n"), 1);
 	}
 	gnrl->num_phil = ft_atoi(argv[0]);
+	if (!gnrl->num_phil)
+		return (printf("0 philosophers??\n"), 1);
 	gnrl->tm_die = ft_atoi(argv[1]);
 	gnrl->tm_eat = ft_atoi(argv[2]);
 	gnrl->tm_sleep = ft_atoi(argv[3]);
@@ -108,7 +110,7 @@ int	create_threads(t_gnrl *gnrl)
 		gnrl->is_nm_eat = 1;
 		pthread_create(&gnrl->check_nm_eat, NULL, &number_eat, gnrl);
 	}
-	usleep(gnrl->tm_die - 20);
+	usleep(200);
 	pthread_create(&gnrl->check_dead, NULL, &check_death, gnrl);
 	return (free_all(gnrl));
 }

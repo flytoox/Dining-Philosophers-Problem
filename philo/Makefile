@@ -6,7 +6,7 @@
 #    By: obelaizi <obelaizi@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/03/30 03:38:51 by obelaizi          #+#    #+#              #
-#    Updated: 2023/06/08 20:50:06 by obelaizi         ###   ########.fr        #
+#    Updated: 2023/06/12 23:33:43 by obelaizi         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -23,7 +23,7 @@ all : $(NAME)
 	cc -c -g $(FLAGS) $< -o $@
 
 $(NAME): $(OBJS)
-	@cc -g $(OBJS) -o $(NAME) 
+	cc -g $(OBJS) -o $(NAME) 
 
 clean:
 	@rm -f $(OBJS) 

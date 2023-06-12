@@ -6,11 +6,11 @@
 /*   By: obelaizi <obelaizi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/10 11:57:52 by obelaizi          #+#    #+#             */
-/*   Updated: 2023/06/10 12:13:51 by obelaizi         ###   ########.fr       */
+/*   Updated: 2023/06/12 20:15:06 by obelaizi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "philo.h"
+#include "philo_bonus.h"
 
 void	free_all(t_gnrl *gnrl)
 {

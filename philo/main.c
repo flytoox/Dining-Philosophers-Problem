@@ -6,7 +6,7 @@
 /*   By: obelaizi <obelaizi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/30 03:41:20 by obelaizi          #+#    #+#             */
-/*   Updated: 2023/06/08 20:48:36 by obelaizi         ###   ########.fr       */
+/*   Updated: 2023/06/12 23:32:35 by obelaizi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,8 @@ int	get_time(int start_time)
 
 int	my_print(const char *str, t_phl *philo)
 {
+	if (!str || !philo)
+		return (1);
 	pthread_mutex_lock(&philo->gnrl->prnt);
 	pthread_mutex_lock(&philo->gnrl->mu_dead);
 	if (!philo->gnrl->dead)
@@ -47,12 +49,12 @@ int	eating(t_phl *philo)
 	pthread_mutex_lock(&philo->gnrl->forks[i1]);
 	if (my_print("%d %d has taken fork\n", philo))
 		return (pthread_mutex_unlock(&philo->gnrl->forks[i1]), 1);
+	if (philo->gnrl->num_phil == 1)
+		return (1);
 	pthread_mutex_lock(&philo->gnrl->forks[i2]);
 	if (my_print("%d %d has taken fork\n", philo))
-	{
-		pthread_mutex_unlock(&philo->gnrl->forks[i1]);
-		return (pthread_mutex_unlock(&philo->gnrl->forks[i2]), 1);
-	}
+		return (pthread_mutex_unlock(&philo->gnrl->forks[i1]),
+			pthread_mutex_unlock(&philo->gnrl->forks[i2]), 1);
 	if (my_print("%d %d is eating\n", philo))
 	{
 		pthread_mutex_unlock(&philo->gnrl->forks[i1]);
@@ -73,7 +75,7 @@ void	*action(void *phl)
 	philo = (t_phl *)phl;
 	philo->nm_eat = philo->gnrl->nm_eat;
 	if (philo->id % 2 == 0)
-		ft_usleep(philo->gnrl->tm_eat - 10);
+		ft_usleep(1);
 	while (1)
 	{
 		pthread_mutex_lock(&philo->gnrl->mu_dead);

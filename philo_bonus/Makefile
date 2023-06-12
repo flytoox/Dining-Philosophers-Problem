@@ -6,12 +6,11 @@
 #    By: obelaizi <obelaizi@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/03/30 03:38:51 by obelaizi          #+#    #+#              #
-#    Updated: 2023/06/09 19:15:34 by obelaizi         ###   ########.fr        #
+#    Updated: 2023/06/12 20:17:00 by obelaizi         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = philo_bonus
-FLAGS = -Werror -Wall -Wextra 
 
 SRCS = free_all.c main.c mainHelper.c mainHelper1.c
 OBJS= $(SRCS:.c=.o)
@@ -19,7 +18,7 @@ OBJS= $(SRCS:.c=.o)
 
 all : $(NAME)
 
-%.o: %.c philo.h 
+%.o: %.c philo_bonus.h 
 	cc -c -g $(FLAGS) $< -o $@
 
 $(NAME): $(OBJS)
