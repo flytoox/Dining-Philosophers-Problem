@@ -6,7 +6,7 @@
 /*   By: obelaizi <obelaizi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/22 19:07:44 by obelaizi          #+#    #+#             */
-/*   Updated: 2023/06/12 23:33:20 by obelaizi         ###   ########.fr       */
+/*   Updated: 2023/06/21 11:59:33 by obelaizi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,10 +51,30 @@ int	init_var(t_gnrl *gnrl)
 	{
 		gnrl->phls[i].id = i + 1;
 		gnrl->phls[i].gnrl = gnrl;
+		pthread_mutex_init(&gnrl->forks[i], NULL);
+		pthread_mutex_init(&gnrl->phls[i].mu_meal, NULL);
+		pthread_mutex_init(&gnrl->phls[i].mu_nm_eat, NULL);
 		i++;
 	}
 	pthread_mutex_init(&gnrl->mu_dead, NULL);
 	return (create_threads(gnrl));
+}
+
+void	check_death_helper(t_gnrl *gnrl, int i)
+{
+	pthread_mutex_unlock(&gnrl->phls[i].mu_meal);
+	pthread_mutex_lock(&gnrl->prnt);
+	pthread_mutex_lock(&gnrl->mu_dead);
+	if (!gnrl->dead)
+	{
+		pthread_mutex_unlock(&gnrl->mu_dead);
+		pthread_mutex_unlock(&gnrl->prnt);
+		return ;
+	}
+	gnrl->dead = 0;
+	pthread_mutex_unlock(&gnrl->mu_dead);
+	printf("%d %d died\n", get_time(gnrl->start_time), gnrl->phls[i].id);
+	pthread_mutex_unlock(&gnrl->prnt);
 }
 
 void	*check_death(void *var)
@@ -66,23 +86,17 @@ void	*check_death(void *var)
 	gnrl = (t_gnrl *)var;
 	while (1)
 	{
-		if (i == gnrl->num_phil)
-			i = 0;
+		i = i % gnrl->num_phil;
 		pthread_mutex_lock(&gnrl->phls[i].mu_meal);
+		pthread_mutex_lock(&gnrl->mu_dead);
 		if (!gnrl->dead)
-			return (NULL);
+			return (pthread_mutex_unlock(&gnrl->mu_dead), NULL);
+		pthread_mutex_unlock(&gnrl->mu_dead);
 		if (get_time(gnrl->start_time) - gnrl->phls[i].last_meal
 			>= gnrl->tm_die)
-		{
-			pthread_mutex_unlock(&gnrl->phls[i].mu_meal);
-			pthread_mutex_lock(&gnrl->prnt);
-			pthread_mutex_lock(&gnrl->mu_dead);
-			gnrl->dead = 0;
-			pthread_mutex_unlock(&gnrl->mu_dead);
-			printf("%d %d died\n", get_time(gnrl->start_time), gnrl->phls[i].id);
-			return (pthread_mutex_unlock(&gnrl->prnt), NULL);
-		}
+			return (check_death_helper(gnrl, i), NULL);
 		pthread_mutex_unlock(&gnrl->phls[i++].mu_meal);
+		usleep(200);
 	}
 }
 
@@ -90,12 +104,6 @@ int	create_threads(t_gnrl *gnrl)
 {
 	int	i;
 
-	i = -1;
-	while (++i < gnrl->num_phil)
-	{
-		pthread_mutex_init(&gnrl->forks[i], NULL);
-		pthread_mutex_init(&gnrl->phls[i].mu_meal, NULL);
-	}
 	pthread_mutex_init(&gnrl->prnt, NULL);
 	i = -1;
 	gnrl->dead = 1;
@@ -103,14 +111,12 @@ int	create_threads(t_gnrl *gnrl)
 	while (++i < gnrl->num_phil)
 	{
 		gnrl->phls[i].last_meal = get_time(gnrl->start_time);
+		gnrl->phls[i].nm_eat = gnrl->nm_eat;
 		pthread_create(&gnrl->phls[i].thread, NULL, &action, &gnrl->phls[i]);
 	}
 	if (gnrl->nm_eat != -1)
-	{
-		gnrl->is_nm_eat = 1;
 		pthread_create(&gnrl->check_nm_eat, NULL, &number_eat, gnrl);
-	}
-	usleep(200);
 	pthread_create(&gnrl->check_dead, NULL, &check_death, gnrl);
+	usleep(200);
 	return (free_all(gnrl));
 }

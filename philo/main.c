@@ -6,7 +6,7 @@
 /*   By: obelaizi <obelaizi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/30 03:41:20 by obelaizi          #+#    #+#             */
-/*   Updated: 2023/06/12 23:32:35 by obelaizi         ###   ########.fr       */
+/*   Updated: 2023/06/19 15:16:18 by obelaizi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,9 +73,8 @@ void	*action(void *phl)
 	t_phl	*philo;
 
 	philo = (t_phl *)phl;
-	philo->nm_eat = philo->gnrl->nm_eat;
 	if (philo->id % 2 == 0)
-		ft_usleep(1);
+		usleep(300);
 	while (1)
 	{
 		pthread_mutex_lock(&philo->gnrl->mu_dead);
@@ -84,8 +83,10 @@ void	*action(void *phl)
 		pthread_mutex_unlock(&philo->gnrl->mu_dead);
 		if (eating(philo))
 			return (NULL);
+		pthread_mutex_lock(&philo->mu_nm_eat);
 		if (philo->nm_eat > 0)
 			philo->nm_eat--;
+		pthread_mutex_unlock(&philo->mu_nm_eat);
 		if (my_print("%d %d is sleeping\n", philo))
 			return (NULL);
 		ft_usleep(philo->gnrl->tm_sleep);
@@ -100,7 +101,7 @@ int	main(int argc, char **argv)
 	t_gnrl	gnrl;
 
 	if (argc != 6 && argc != 5)
-		return (printf("Dude Arguments is sus\n"), 1);
+		return (printf("Dude Arguments are sus\n"), 1);
 	if (give_me_args(argv, argc, &gnrl))
 		return (1);
 	return (init_var(&gnrl));

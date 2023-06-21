@@ -6,7 +6,7 @@
 /*   By: obelaizi <obelaizi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/07 22:13:03 by obelaizi          #+#    #+#             */
-/*   Updated: 2023/06/12 20:15:08 by obelaizi         ###   ########.fr       */
+/*   Updated: 2023/06/19 14:59:18 by obelaizi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,8 +51,8 @@ void	ft_usleep(int time_sleep)
 	int	i;
 
 	i = time_now();
-	while (time_now() - i <= time_sleep)
-		usleep(100);
+	while (time_now() - i < time_sleep)
+		usleep(50);
 }
 
 int	count(int n)
@@ -63,7 +63,7 @@ int	count(int n)
 		return (1);
 	result = 0;
 	if (n < 0)
-		result += 1;
+		result++;
 	while (n != 0)
 	{
 		n /= 10;
@@ -80,16 +80,9 @@ void	create_semaphores(t_gnrl *gnrl)
 	i = 0;
 	sem_unlink("/prnt");
 	sem_unlink("/forks");
-	// while (++i <= gnrl->num_phil)
-	// {
-	// 	tmp = ft_itoa(-i);
-	// 	sem_unlink(tmp);
-	// 	gnrl->phls[i - 1].mu_meal
-	// 		= sem_open("/tmp", O_CREAT | O_EXCL, 0644, 1);
-	// 	free(tmp);
-	// }
-	gnrl->forks = sem_open("/forks", O_CREAT | O_EXCL, 0644, gnrl->num_phil);
-	gnrl->prnt = sem_open("/prnt", O_CREAT | O_EXCL, 0644, 1);
+	sem_unlink("/lstmeal");
+	gnrl->forks = sem_open("/forks", O_CREAT | O_EXCL, 0666, gnrl->num_phil);
+	gnrl->prnt = sem_open("/prnt", O_CREAT | O_EXCL, 0666, 1);
 	i = -1;
 	if (gnrl->nm_eat != -1)
 	{	
@@ -98,7 +91,7 @@ void	create_semaphores(t_gnrl *gnrl)
 			tmp = ft_itoa(i);
 			sem_unlink(tmp);
 			gnrl->phls[i].num_eat
-				= sem_open(tmp, O_CREAT | O_EXCL, 0644, 0);
+				= sem_open(tmp, O_CREAT | O_EXCL, 0666, 0);
 			free(tmp);
 		}
 	}

@@ -6,7 +6,7 @@
 /*   By: obelaizi <obelaizi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/22 19:07:44 by obelaizi          #+#    #+#             */
-/*   Updated: 2023/06/12 20:15:08 by obelaizi         ###   ########.fr       */
+/*   Updated: 2023/06/21 11:50:32 by obelaizi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ void	give_me_args(char **argv, int argc, t_gnrl *gnrl)
 
 void	init_var(t_gnrl *gnrl)
 {
-	int	i;
+	int		i;
 
 	i = 0;
 	gnrl->phls = malloc(sizeof(t_phl) * gnrl->num_phil);
@@ -60,16 +60,19 @@ void	*check_death(void *phl)
 	philo = (t_phl *)phl;
 	while (1)
 	{
-		curr_time = get_time(philo->gnrl->start_time) - philo->last_meal;
+		curr_time = get_time(philo->gnrl->start_time);
+		sem_wait(philo->sm_lst_meal);
+		curr_time = curr_time - philo->last_meal;
+		sem_post(philo->sm_lst_meal);
 		if (curr_time >= philo->gnrl->tm_die)
 		{
 			sem_wait(philo->gnrl->prnt);
 			printf("%d %d died\n", get_time(philo->gnrl->start_time), philo->id);
 			exit (0);
-			sem_post(philo->gnrl->prnt);
 		}
+		usleep(200);
 	}
-	return (0);
+	return (NULL);
 }
 
 void	create_threads(t_gnrl *gnrl)
@@ -87,7 +90,6 @@ void	create_threads(t_gnrl *gnrl)
 		if (!pid)
 			action(&gnrl->phls[i]);
 	}
-	usleep(500);
 	free_all(gnrl);
 }
 

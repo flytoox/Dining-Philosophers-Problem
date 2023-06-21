@@ -6,7 +6,7 @@
 /*   By: obelaizi <obelaizi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/07 22:13:03 by obelaizi          #+#    #+#             */
-/*   Updated: 2023/06/12 23:33:06 by obelaizi         ###   ########.fr       */
+/*   Updated: 2023/06/21 12:06:02 by obelaizi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,32 +38,50 @@ int	ft_atoi(const char *str)
 	return (result);
 }
 
+int	number_eat_helper(t_gnrl *gnrl, int *total)
+{
+	int	i;
+
+	i = -1;
+	while (++i < gnrl->num_phil)
+	{
+		pthread_mutex_lock(&gnrl->phls[i].mu_nm_eat);
+		if (gnrl->phls[i].nm_eat == 0)
+			(*total)++;
+		pthread_mutex_unlock(&gnrl->phls[i].mu_nm_eat);
+	}
+	pthread_mutex_lock(&gnrl->prnt);
+	if (*total == gnrl->num_phil)
+	{
+		pthread_mutex_lock(&gnrl->mu_dead);
+		if (!gnrl->dead)
+			return (pthread_mutex_unlock(&gnrl->mu_dead),
+				pthread_mutex_unlock(&gnrl->prnt), 1);
+		gnrl->dead = 0;
+		pthread_mutex_unlock(&gnrl->mu_dead);
+		return (printf("%d Enough is Enough\n", get_time(gnrl->start_time)),
+			pthread_mutex_unlock(&gnrl->prnt), 1);
+	}
+	pthread_mutex_unlock(&gnrl->prnt);
+	return (0);
+}
+
 void	*number_eat(void	*var)
 {
 	t_gnrl	*gnrl;
-	int		i;
 	int		total;
 
 	gnrl = (t_gnrl *) var;
 	while (1)
 	{
+		pthread_mutex_lock(&gnrl->mu_dead);
 		if (!gnrl->dead)
-			return (NULL);
+			return (pthread_mutex_unlock(&gnrl->mu_dead), NULL);
+		pthread_mutex_unlock(&gnrl->mu_dead);
 		total = 0;
-		i = -1;
-		while (++i < gnrl->num_phil)
-			if (gnrl->phls[i].nm_eat == 0)
-				total++;
-		pthread_mutex_lock(&gnrl->prnt);
-		if (total == gnrl->num_phil)
-		{
-			pthread_mutex_lock(&gnrl->mu_dead);
-			gnrl->dead = 0;
-			pthread_mutex_unlock(&gnrl->mu_dead);
-			return (printf("%d Enough is Enough\n", get_time(gnrl->start_time)),
-				pthread_mutex_unlock(&gnrl->prnt), NULL);
-		}
-		pthread_mutex_unlock(&gnrl->prnt);
+		if (number_eat_helper(gnrl, &total))
+			return (NULL);
+		usleep(200);
 	}
 }
 
@@ -80,6 +98,6 @@ void	ft_usleep(int time_sleep)
 	int	i;
 
 	i = time_now();
-	while (time_now() - i <= time_sleep)
-		usleep(200);
+	while (time_now() - i < time_sleep)
+		usleep(50);
 }

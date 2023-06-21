@@ -6,7 +6,7 @@
 /*   By: obelaizi <obelaizi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/30 03:39:25 by obelaizi          #+#    #+#             */
-/*   Updated: 2023/06/08 20:45:46 by obelaizi         ###   ########.fr       */
+/*   Updated: 2023/06/13 19:49:56 by obelaizi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@ typedef struct phl
 	pthread_mutex_t	mu_meal;
 	int				last_meal;
 	int				nm_eat;
+	pthread_mutex_t	mu_nm_eat;
 	struct gnrl		*gnrl;
 }	t_phl;
 
