@@ -6,7 +6,7 @@
 /*   By: obelaizi <obelaizi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/22 19:07:44 by obelaizi          #+#    #+#             */
-/*   Updated: 2023/06/21 11:50:32 by obelaizi         ###   ########.fr       */
+/*   Updated: 2023/06/21 12:29:25 by obelaizi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,8 @@ void	init_var(t_gnrl *gnrl)
 
 	i = 0;
 	gnrl->phls = malloc(sizeof(t_phl) * gnrl->num_phil);
+	if (!gnrl->phls)
+		exit (1);
 	while (i < gnrl->num_phil)
 	{
 		gnrl->phls[i].id = i + 1;
